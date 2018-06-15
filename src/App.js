@@ -8,24 +8,43 @@ class App extends Component {
   //              componentWillUpdate() -> render() -> componentDidUpdate()
 
   state = {
-  }
+  };
 
   componentDidMount() {
-    console.log(fetch("https://yts.am/api/v2/list_movies.json?sort_by=rating"));
-//    .then(response => console.log(response))
-//    .catch(error => console.log(error.message))
+    this._getMovies();
   }
 
   _renderMovies = () => {
-    var movieCompList = this.state.movies.map((movie, index) => {
-      return(<Movie title={movie.title} poster={movie.poster} key={index}/>);
+    var movieCompList = this.state.movies.map(movie => {
+      return(<Movie 
+        title={movie.title} 
+        poster={movie.large_cover_image} 
+        key={movie.id}
+        genres={movie.genres}
+        synopsis={movie.synopsis}
+      />);
     });
     return movieCompList;
   };
 
+  _getMovies = async () => {
+    const movies = await this._callApi();
+    this.setState({
+      movies
+    });
+  }
+
+  _callApi = () => {
+    return fetch("https://yts.am/api/v2/list_movies.json?sort_by=download_count")
+    .then(response => response.json())
+    .then(json => json.data.movies)
+    .catch(error => console.log(error))
+  }
+
   render() {
+    const { movies } = this.state;
     return (
-      <div className="App">
+      <div className={movies ? "App" : "app-loadin"}>
         {this.state.movies ? this._renderMovies() : "Loading..."}
       </div>
     );
